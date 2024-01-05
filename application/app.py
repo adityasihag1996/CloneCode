@@ -32,29 +32,3 @@ def submit():
 
 if __name__ == '__main__':
     app.run(debug = True, port = 5577)
-
-
-
-# from redis import Redis
-# from rq import Queue
-# import time
-
-# # Connect to Redis server
-# redis_conn = Redis(
-#     host = 'localhost',
-#     port = 4567,
-#     db = 0,
-#     password = 'yourpassword'
-# )
-
-# # Setup the queue and worker
-# redis_rq = Queue('runs', connection = redis_conn)
-
-# data = {}
-
-# for i in range(100):
-#     data["idx"] = i
-#     data["code"] = f"print(\"hello world, {i}\")"
-#     data["run_id"] = int(time.time_ns())
-#     enqueue_job = redis_rq.enqueue('tasks.process_data', data)
-#     # time.sleep(0.1)
