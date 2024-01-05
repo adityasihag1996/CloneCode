@@ -12,7 +12,7 @@ else
 fi
 
 # Configure Redis to start on a specific port
-REDIS_PORT=6379  # Replace 6379 with your desired port
+REDIS_PORT=4567  # your desired port
 
 # Modify Redis configuration to use the specified port
 if [ -f /etc/redis/redis.conf ]; then
