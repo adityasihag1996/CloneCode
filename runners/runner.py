@@ -6,13 +6,8 @@ from multiprocessing import Process
 from DockerManager import DockerManager
 
 def start_worker():
-    # RQ
-    redis_rq_conn = Redis(
-        host = '192.168.1.6',
-        port = 4567,
-        db = 0,
-        password = 'yourpassword'
-    )
+    # RQ conn
+    redis_rq_conn = Redis(host = '192.168.1.6', port = 4567, db = 0, password = 'yourpassword')
     redis_rq = Queue('runs', connection = redis_rq_conn)
 
     with Connection(redis_rq_conn):
@@ -22,7 +17,7 @@ def start_worker():
 if __name__ == '__main__':
     parallels = 8
 
-    # local Redis
+    # local Redis conn
     local_redis = Redis(
         host = 'localhost',
         port = 8899,
@@ -48,7 +43,7 @@ if __name__ == '__main__':
         process.start()
         processes.append(process)
 
-    # Optionally, join the processes (not typically needed in a server context)
+    # join the processes
     for process in processes:
         process.join()
 

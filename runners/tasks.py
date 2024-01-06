@@ -22,25 +22,4 @@ def process_data(json_data):
 
     local_redis.zadd('containers', {container.id: 0})  # Reset to free
 
-# def process_data(json_data):
-#     all_containers = docker.from_env().containers.list()
-#     local_redis = Redis(
-#         host = 'localhost',
-#         port = 8899,
-#         db = 0,
-#         # password = 'yourpassword',
-#         decode_responses = True,
-#     )
-
-#     # choose a free container
-#     for container in all_containers:
-#         key = f"{container.id}"
-#         if local_redis.getset(key, "true") == "false":
-#             break
-
-#     ## DO SOME PROCESSSING IN THE CONTAINER
-#     exec_log = container.exec_run(f"python -c '{json_data['code']}'", workdir = "/app")
-#     print(f"Container {container.id} output:")
-#     print(exec_log.output.decode())
-
-#     local_redis.getset(key, "false")
+    
