@@ -1,6 +1,5 @@
 import signal
 from functools import wraps
-import errno
 
 # Define the timeout exception
 class TimeoutError(Exception):
