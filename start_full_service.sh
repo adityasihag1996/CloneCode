@@ -49,10 +49,13 @@ chmod +x "question_db/start_redis.sh"
 start_tmux_session_with_command qdb "cd question_db && ./start_redis.sh"
 
 # 4. Start Flask server in /application with Conda environment 'app'
-start_tmux_session_with_conda_command flask_server app 3.10 "cd application && pip install -r requirements.txt && python app.py"
+start_tmux_session_with_conda_command flask_server app 3.10 "cd application && pip install -r requirements.txt && python add_sample_question_data.py && python app.py"
 
 # 5. Start Redis Docker and runner.py in /runners with Conda environment 'worker'
 chmod +x "runners/start_redis.sh"
 start_tmux_session_with_command redis_worker "cd runners && ./start_redis.sh"
 chmod +x "runners/start_docker.sh"
 start_tmux_session_with_conda_command worker worker 3.10 "cd runners && pip install -r requirements.txt && ./start_docker.sh && python runner.py"
+
+# 6. Launch the frontend
+open frontend/home.html
