@@ -1,14 +1,26 @@
 from flask import Flask, request, jsonify
-import redis
+from redis import Redis
 from rq import Queue
 import time
 
 app = Flask(__name__)
 
-# Configure the Redis connection and RQ Queue
-jobs_rq_url = "redis://localhost:4567"
-redis_server = redis.Redis.from_url(jobs_rq_url)
+# RQ
+redis_server = Redis(
+    host = 'localhost',
+    port = 4567,
+    db = 0,
+    password = 'yourpassword'
+)
 redis_rq = Queue('runs', connection = redis_server)
+
+# QUESTIONS DB
+redis_server = Redis(
+    host = 'localhost',
+    port = 5678,
+    db = 0,
+    password = 'yourpassword'
+)
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -17,6 +29,9 @@ def submit():
     
     data = request.get_json()
     data["run_id"] = int(time.time_ns())
+
+    # fetch question for QUESTION_DB, using questionId / titleSlug
+    # send the entire code packet in "data"
 
     try:
         # Enqueue the task
