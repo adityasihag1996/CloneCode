@@ -15,7 +15,7 @@ else
 fi
 
 # Specify the desired port for Redis
-REDIS_PORT=4567
+REDIS_PORT=6789
 
 # Start Redis server on the specified port
 echo "Starting Redis server on port $REDIS_PORT..."

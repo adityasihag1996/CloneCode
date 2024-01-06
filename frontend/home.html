@@ -10,31 +10,31 @@
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            height: 100vh; /* Use the full viewport height */
+            height: 100vh;
         }
         h1 {
             text-align: center;
         }
         #main-content {
             display: flex;
-            flex: 1; /* Take up all available space except what's needed for nav and button */
+            flex: 1;
             width: 100%;
         }
         #content, #text-editor {
-            flex: 1; /* Split the space evenly between content and text editor */
-            overflow: auto; /* Add scrollbars if content overflows */
+            flex: 1;
+            overflow: auto;
         }
         #text-editor {
-            resize: none; /* Disable resizing of the text editor */
-            margin-left: 10px; /* Add some space between the content and text editor */
+            resize: none;
+            margin-left: 10px;
         }
         nav {
             display: flex;
-            justify-content: center; /* Center the pagination links */
+            justify-content: center;
             padding: 10px 0;
         }
         nav a {
-            margin: 0 5px; /* Space out the links */
+            margin: 0 5px;
             text-decoration: none;
             color: black;
         }
@@ -64,14 +64,14 @@
     </div>
 
     <script>
-        let maxPages = 0; // Global variable to hold the max number of pages
-        let currentPage = 1; // Keep track of the current page
-        let runId; // To save the run_id for future use
+        let maxPages = 0;
+        let currentPage = 1;
+        let runId;
         let pollInterval;
     
         function createPagination(currentPage) {
             const pagination = document.getElementById('pagination');
-            pagination.innerHTML = ''; // Clear existing pagination
+            pagination.innerHTML = '';
     
             // Add 'Prev' link
             pagination.innerHTML += `<a href="#" onclick="fetchContent(${currentPage - 1});return false;">Prev</a>`;
@@ -176,7 +176,7 @@
                     clearInterval(pollInterval);
                     enableInteraction();
                 });
-            }, 1000); // Poll every 1 seconds, adjust as needed
+            }, 1000); // Poll every 1 seconds
         }
     
         // Call fetchTotalCount on page load to setup the pagination and fetch initial content
