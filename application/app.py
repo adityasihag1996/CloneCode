@@ -10,7 +10,6 @@ redis_rq_conn = Redis(
     host = 'localhost',
     port = 4567,
     db = 0,
-    password = 'yourpassword',
     decode_responses = True,
 )
 redis_rq = Queue('runs', connection = redis_rq_conn)
@@ -20,7 +19,14 @@ redis_ques_conn = Redis(
     host = 'localhost',
     port = 5678,
     db = 0,
-    password = 'yourpassword',
+    decode_responses = True,
+)
+
+# metadata Redis conn
+redis_metadata_conn = Redis(
+    host = 'localhost',
+    port = 6789,
+    db = 0,
     decode_responses = True,
 )
 
@@ -31,16 +37,19 @@ def submit():
     
     data = request.get_json()
     data["run_id"] = int(time.time_ns())
-    data["fillCode"] = data["fillCode"]
 
     # Specify the questionId you want to fetch
-    question_id = data["question_id"]
+    question_id = str(data["question_id"])
 
     # Fetch the data for the specified questionId
-    question_data = redis_ques_conn.get(question_id)
-    data["skullCode"] = question_data["skullCode"]
+    question_data = redis_ques_conn.get(f"questionId:{question_id}")
+    question_data = json.loads(question_data)
     data["exampleTestcase"] = question_data["exampleTestcase"]
     data["exampleTestcaseResult"] = question_data["exampleTestcaseResult"]
+    data["inplaceResult"] = question_data["inplaceResult"]
+
+    data["code"] = data["fillCode"] + question_data["runnerSkeletonCode"]
+    del data["fillCode"]
 
     try:
         # Enqueue the task
@@ -73,6 +82,21 @@ def problem():
 
     return jsonify({
         "question_data": json.loads(question_data)
+    }), 202
+
+@app.route('/runData', methods=['GET'])
+def runData():
+    run_id = request.args.get('runId')
+    run_data = redis_metadata_conn.hgetall(f"run_id:{run_id}")
+
+    if not run_data:
+        # Handle the case where the question is not found
+        return jsonify({
+            "message": "Run Data not found",
+        }), 404
+
+    return jsonify({
+        "run_data": run_data
     }), 202
 
         
