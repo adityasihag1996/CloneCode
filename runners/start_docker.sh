@@ -9,11 +9,5 @@ else
     echo "Docker is already installed."
 fi
 
-# Wait for Docker service to start
 echo "Starting Docker service..."
-while ! docker system info >/dev/null 2>&1; do
-    echo "Waiting for Docker to start..."
-    sleep 5
-done
-
 echo "Docker service is running."
