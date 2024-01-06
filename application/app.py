@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from redis import Redis
 from rq import Queue
 import time, json
 
 app = Flask(__name__)
+CORS(app)
 
 # RQ
 redis_rq_conn = Redis(

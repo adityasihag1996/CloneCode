@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clone Code</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Use the full viewport height */
+        }
+        h1 {
+            text-align: center;
+        }
+        #main-content {
+            display: flex;
+            flex: 1; /* Take up all available space except what's needed for nav and button */
+            width: 100%;
+        }
+        #content, #text-editor {
+            flex: 1; /* Split the space evenly between content and text editor */
+            overflow: auto; /* Add scrollbars if content overflows */
+        }
+        #text-editor {
+            resize: none; /* Disable resizing of the text editor */
+            margin-left: 10px; /* Add some space between the content and text editor */
+        }
+        nav {
+            display: flex;
+            justify-content: center; /* Center the pagination links */
+            padding: 10px 0;
+        }
+        nav a {
+            margin: 0 5px; /* Space out the links */
+            text-decoration: none;
+            color: black;
+        }
+        #submit-button-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clone Code</h1>
+    <nav id="pagination">
+        <!-- Pagination links will be dynamically inserted here -->
+    </nav>
+
+    <div id="main-content">
+        <div id="content">
+            <!-- Content will be loaded here based on the response from GET request -->
+        </div>
+        <textarea id="text-editor">
+            <!-- Text editor content will be filled here depending on the response -->
+        </textarea>
+    </div>
+
+    <div id="submit-button-container">
+        <button onclick="submitData()" id="submit-button">Submit</button>
+    </div>
+
+    <script>
+        let maxPages = 0; // Global variable to hold the max number of pages
+        let currentPage = 1; // Keep track of the current page
+        let runId; // To save the run_id for future use
+        let pollInterval;
+    
+        function createPagination(currentPage) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = ''; // Clear existing pagination
+    
+            // Add 'Prev' link
+            pagination.innerHTML += `<a href="#" onclick="fetchContent(${currentPage - 1});return false;">Prev</a>`;
+    
+            // Add numeric page links
+            for (let i = 1; i <= maxPages; i++) {
+                pagination.innerHTML += `<a href="#" onclick="fetchContent(${i});return false;">${i}</a>`;
+            }
+    
+            // Add 'Next' link
+            pagination.innerHTML += `<a href="#" onclick="fetchContent(${currentPage + 1});return false;">Next</a>`;
+        }
+    
+        function fetchContent(questionId) {
+            if (questionId < 1 || questionId > maxPages) {
+                return; // Do nothing if the questionId is out of range
+            }
+    
+            const url = `http://localhost:5577/problem?questionId=${questionId}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('content').innerHTML = data.question_data.content;
+                    document.getElementById('text-editor').value = data.question_data.skullCode;
+                    createPagination(questionId); // Update pagination links
+                })
+                .catch(error => {
+                    console.error('Error fetching content:', error);
+                });
+        }
+    
+        function fetchTotalCount() {
+            fetch('http://localhost:5577/totalCount')
+                .then(response => response.json())
+                .then(data => {
+                    maxPages = parseInt(data.totalCount, 10); // Parse totalCount as an integer
+                    createPagination(1); // Create pagination with 1 as the starting page
+                    fetchContent(1); // Fetch content for the first page
+                })
+                .catch(error => {
+                    console.error('Error fetching total count:', error);
+                });
+        }
+
+        function submitData() {
+            const textEditorContent = document.getElementById('text-editor').value;
+            const payload = {
+                question_id: currentPage,
+                fillCode: textEditorContent,
+            };
+
+            fetch('http://localhost:5577/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.status === 202) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to submit data');
+                }
+            })
+            .then(data => {
+                runId = data.run_id; // Save the run_id for future use
+                console.log('Data received and task enqueued', data);
+                disableInteraction(); // Disable interaction while polling for run data
+                pollForRunData(runId); // Start polling for run data
+            })
+            .catch(error => {
+                console.error('Error submitting data:', error);
+            });
+        }
+
+        function disableInteraction() {
+            document.getElementById('text-editor').disabled = true;
+            document.getElementById('pagination').style.pointerEvents = 'none';
+            document.getElementById('submit-button').disabled = true;
+        }
+
+        function enableInteraction() {
+            document.getElementById('text-editor').disabled = false;
+            document.getElementById('pagination').style.pointerEvents = 'auto';
+            document.getElementById('submit-button').disabled = false;
+        }
+
+        function pollForRunData(runId) {
+            pollInterval = setInterval(() => {
+                fetch(`http://localhost:5577/runData?runId=${runId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.run_data) {
+                        clearInterval(pollInterval);
+                        enableInteraction(); // Re-enable interaction
+                        alert(JSON.stringify(data.run_data, null, 2)); // Show the run_data in an alert
+                    }
+                })
+                .catch(error => {
+                    console.error('Error polling for run data:', error);
+                    clearInterval(pollInterval);
+                    enableInteraction();
+                });
+            }, 1000); // Poll every 1 seconds, adjust as needed
+        }
+    
+        // Call fetchTotalCount on page load to setup the pagination and fetch initial content
+        document.addEventListener('DOMContentLoaded', fetchTotalCount);
+    </script>
+     
+</body>
+</html>
